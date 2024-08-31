@@ -1,4 +1,4 @@
-use soop::{eval_root, parse, Cli, Env};
+use soop::{deep_to_exp, eval, parse, print, Cli, Env};
 
 use clap::Parser;
 use std::fs;
@@ -15,5 +15,5 @@ fn main() {
         }
     };
 
-    println!("{:?}", eval_root(parse(&text), Env::new()));
+    println!("{}", print(deep_to_exp(eval(parse(&text), Env::new()))));
 }

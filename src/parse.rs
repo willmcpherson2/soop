@@ -39,6 +39,7 @@ fn parse_exp(bexp: Bexp) -> Exp {
         },
         Bexp::Parens(bexp) => parse_exp(*bexp),
         Bexp::Pat(pat) => Exp::Pat(pat),
+        Bexp::Error(e) => Exp::Error(*e),
     }
 }
 

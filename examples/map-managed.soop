@@ -1,0 +1,11 @@
+map = entries -> (
+  :entries -> entries,
+  :set -> entry -> map (entry, entries),
+  :get -> key -> entries key
+);
+
+map = map (_ -> :none);
+
+names = map :set (:a -> :alice) :set (:b -> :bob);
+
+names :get :a, names :get :b, names :get :c

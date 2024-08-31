@@ -1,9 +1,13 @@
-super =
-  :a -> :super_a,
-  :b -> :super_b;
+person = name -> (
+  :name -> name,
+  :say -> word -> (name, :says, word),
+  :greet -> other -> (person name :say :hello, :to, other :name)
+);
 
-sub =
-  :a -> :sub_a,
-  super;
+alice =
+  person :alice,
+  :shout -> alice :say :WOO;
 
-sub :b
+bob = person :bob;
+
+alice :shout, :and, alice :greet bob

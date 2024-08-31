@@ -1,0 +1,18 @@
+cons = x -> xs -> (
+  :head -> x,
+  :tail -> xs,
+  :map -> f -> cons (f x) (xs :map f)
+);
+
+nil =
+  :map -> f -> nil;
+
+not =
+  :true -> :false,
+  :false -> :true;
+
+true_false = cons :true (cons :false nil);
+
+false_true = true_false :map not;
+
+false_true :tail :head

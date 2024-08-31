@@ -1,0 +1,21 @@
+some = x -> (
+  :get -> x,
+  :map -> f -> some (f x),
+  :else -> _ -> x
+);
+
+none =
+  :map -> f -> none,
+  :else -> x -> x;
+
+not =
+  :true -> :false,
+  :false -> :true;
+
+some_true = some :true;
+
+some_false = some_true :map not;
+
+still_false = some_false :else :true;
+
+still_false

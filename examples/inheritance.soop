@@ -1,0 +1,9 @@
+super =
+  :a -> :super_a,
+  :b -> :super_b;
+
+sub =
+  :a -> :sub_a,
+  super;
+
+sub :b

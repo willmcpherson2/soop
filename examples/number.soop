@@ -1,0 +1,12 @@
+z =
+  :get -> :z,
+  :plus -> n -> n;
+
+s = n -> (
+  :get -> (:s, n :get),
+  :plus -> m -> s (n :plus m)
+);
+
+one = s z;
+
+one :plus one :plus one :get

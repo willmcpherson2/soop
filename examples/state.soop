@@ -1,0 +1,10 @@
+not =
+  :true -> :false,
+  :false -> :true;
+
+toggle = x -> (
+  :get -> x,
+  :flip -> toggle (not x)
+);
+
+toggle :true :flip :flip :get

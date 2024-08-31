@@ -1,4 +1,10 @@
-use crate::{Bexp, Error, Exp, Op, Pat, Side};
+use crate::{
+    Bexp, Error,
+    Exp::{self, *},
+    Op,
+    Pat::*,
+    Side,
+};
 
 use nom::{
     branch::alt,
@@ -13,7 +19,7 @@ use nom::{
 pub fn parse(input: &str) -> Exp {
     match parse_bexp(input) {
         Ok((_, bexp)) => parse_exp(bexp),
-        Err(e) => Exp::Error(Error::ParseError(e.to_string())),
+        Err(e) => Error(Error::ParseError(e.to_string())),
     }
 }
 
@@ -22,24 +28,24 @@ fn parse_exp(bexp: Bexp) -> Exp {
         Bexp::Binary(l, op, r) => match op {
             Op::Semicolon => match *l {
                 Bexp::Binary(var, Op::Equals, exp) => match *var {
-                    Bexp::Pat(Pat::Var(var)) => {
-                        Exp::Let(var, Box::new(parse_exp(*exp)), Box::new(parse_exp(*r)))
+                    Bexp::Pat(Var(var)) => {
+                        Let(var, Box::new(parse_exp(*exp)), Box::new(parse_exp(*r)))
                     }
-                    bexp => Exp::Error(Error::ExpectedVar(bexp)),
+                    bexp => Error(Error::ExpectedVar(bexp)),
                 },
-                bexp => Exp::Error(Error::ExpectedEquals(bexp)),
+                bexp => Error(Error::ExpectedEquals(bexp)),
             },
-            Op::Equals => Exp::Error(Error::UnexpectedEquals(bexp)),
-            Op::Comma => Exp::Cons(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
+            Op::Equals => Error(Error::UnexpectedEquals(bexp)),
+            Op::Comma => Cons(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
             Op::Arrow => match parse_exp(*l) {
-                Exp::Pat(pat) => Exp::Fun(pat, Box::new(parse_exp(*r))),
-                exp => Exp::Error(Error::ExpectedPat(Box::new(exp))),
+                Pat(pat) => Fun(pat, Box::new(parse_exp(*r))),
+                exp => Error(Error::ExpectedPat(Box::new(exp))),
             },
-            Op::Empty => Exp::App(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
+            Op::Empty => App(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
         },
         Bexp::Parens(bexp) => parse_exp(*bexp),
-        Bexp::Pat(pat) => Exp::Pat(pat),
-        Bexp::Error(e) => Exp::Error(*e),
+        Bexp::Pat(pat) => Pat(pat),
+        Bexp::Error(e) => Error(*e),
     }
 }
 
@@ -75,7 +81,7 @@ fn parse_var(input: &str) -> IResult<&str, Bexp> {
             alt((alpha1, tag("_"))),
             many0(alt((alphanumeric1, tag("_")))),
         )),
-        |s: &str| Bexp::Pat(Pat::Var(s.to_string())),
+        |s: &str| Bexp::Pat(Var(s.to_string())),
     )(input)
 }
 
@@ -88,7 +94,7 @@ fn parse_sym(input: &str) -> IResult<&str, Bexp> {
                 many0(alt((alphanumeric1, tag("_")))),
             )),
         ),
-        |s: &str| Bexp::Pat(Pat::Sym(s.to_string())),
+        |s: &str| Bexp::Pat(Sym(s.to_string())),
     )(input)
 }
 

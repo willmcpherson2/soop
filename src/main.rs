@@ -16,7 +16,7 @@ fn main() {
     };
 
     let exp = parse(&text);
-    let deep = eval(exp, Env::new());
+    let deep = eval(Env::new(), exp);
     let exp = deep_to_exp(deep);
     println!("{}", print(exp));
 }

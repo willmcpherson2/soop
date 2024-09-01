@@ -13,4 +13,5 @@ bob =
   :name -> :robert, -- override
   person :bob;
 
+-- ((:alice, :says, :hello), :to, :robert), :and, :alice, :says, :YEAH
 alice :greet bob, :and, alice :shout

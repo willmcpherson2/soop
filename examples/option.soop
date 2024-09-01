@@ -1,21 +1,21 @@
 some = x -> (
-  :get -> x,
-  :map -> f -> some (f x),
-  :else -> _ -> x
+  :show -> (:some, x),
+  :map -> f -> some (f x), -- functor
+  :bind -> f -> f x        -- monad
 );
 
 none =
+  :show -> :none,
   :map -> f -> none,
-  :else -> x -> x;
+  :bind -> f -> none;
 
 not =
   :true -> :false,
   :false -> :true;
 
-some_true = some :true;
+parse =
+  :true -> some :yes,
+  _ -> none;
 
-some_false = some_true :map not;
-
-still_false = some_false :else :true;
-
-still_false
+-- :some, :yes
+some :false :map not :bind parse :show

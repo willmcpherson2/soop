@@ -1,10 +1,12 @@
 cons = x -> xs -> (
+  :show -> (x, xs :show),
   :head -> x,
   :tail -> xs,
   :map -> f -> cons (f x) (xs :map f)
 );
 
 nil =
+  :show -> :nil,
   :map -> f -> nil;
 
 not =
@@ -13,6 +15,5 @@ not =
 
 true_false = cons :true (cons :false nil);
 
-false_true = true_false :map not;
-
-false_true :tail :head
+-- :false, :true, :nil
+true_false :map not :show

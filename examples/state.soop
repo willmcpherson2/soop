@@ -3,4 +3,5 @@ state = x -> (
   :map -> f -> state (f x)
 );
 
+-- :c
 state :a :map (:a -> :b) :map (:b -> :c) :get

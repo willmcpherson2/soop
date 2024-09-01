@@ -27,11 +27,9 @@ fn test_examples() {
         "inheritance.soop",
         "((:alice, :says, :hello), :to, :robert), :and, :alice, :says, :YEAH"
     );
-    run!("list.soop", ":true");
-    run!("map-free.soop", ":alex, :bob, :charlie");
-    run!("map-managed.soop", ":alice, :bob, :none");
-    run!("monad.soop", ":some, :alice_wins");
+    run!("list.soop", ":false, :true, :nil");
+    run!("map.soop", ":alex, :bob, :charlie");
     run!("number.soop", ":s, :s, :s, :0");
-    run!("option.soop", ":false");
+    run!("option.soop", ":some, :yes");
     run!("state.soop", ":c");
 }

@@ -10,12 +10,10 @@ false =
   :or -> x -> x,
   :and -> x -> false;
 
-x = true;
-
-y = x :not;
-
--- applying a symbol is an error
+-- applying to a symbol is an error
 crash = :a :b;
 
+-- :true
+false :not :and true :or crash :show
+
 -- doesn't crash because we're lazy!
-x :or crash :and x :show

@@ -12,4 +12,5 @@ g = fun (:b -> :c);
 
 h = fun (:a -> :b);
 
+-- :d
 f :map (g :map h) :app :a

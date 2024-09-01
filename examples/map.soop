@@ -1,0 +1,18 @@
+-- initial map
+map =
+  :a -> :alice,
+  :b -> :bob;
+
+-- overwrites existing keys
+map =
+  :a -> :alex,
+  map;
+
+-- does not overwrite existing keys
+map =
+  map,
+  :b -> :billy,
+  :c -> :charlie;
+
+-- :alex, :bob, :charlie
+map :a, map :b, map :c

@@ -7,6 +7,7 @@ s = n -> (
   :plus -> m -> s (n :plus m)
 );
 
-one = s 0;
+1 = s 0;
 
-one :plus one :plus one :show
+-- :s, :s, :s, :0
+1 :plus 1 :plus 1 :show

@@ -20,37 +20,41 @@ fn eval_deep(data: Data) -> Deep {
     }
 }
 
-fn eval_lazy(mut env: Env, exp: Exp) -> Data {
+fn eval_lazy(env: Env, exp: Exp) -> Data {
     match exp {
         Let(var, exp, body) => eval_lazy(bind(env, var, *exp), *body),
         Cons(l, r) => Data::Cons(env, l, r),
         Fun(param, body) => Data::Fun(env, param, body),
-        App(fun, arg) => match eval_lazy(env.clone(), *fun) {
-            Data::Cons(cons_env, l, r) => {
-                env.extend(cons_env);
-                match eval_lazy(env.clone(), App(l, arg.clone())) {
-                    Data::Error(_) => eval_lazy(env, App(r, arg)),
-                    data => data,
-                }
-            }
-            Data::Fun(fun_env, param, body) => {
-                env.extend(fun_env);
-                match param {
-                    Var(var) => eval_lazy(bind(env.clone(), var, *arg), *body),
-                    Sym(param) => match eval_lazy(env.clone(), *arg) {
-                        Data::Sym(arg) if param == arg => eval_lazy(env, *body),
-                        Data::Sym(arg) => Data::Error(Error::SymMismatch(param, arg)),
-                        Data::Error(e) => Data::Error(e),
-                        data => Data::Error(Error::ExpectedSym(Box::new(data))),
-                    },
-                }
-            }
-            Data::Sym(sym) => Data::Error(Error::ApplySym(Box::new(Data::Sym(sym)))),
-            Data::Error(e) => Data::Error(e),
-        },
+        App(fun, arg) => apply(env, *fun, *arg),
         Pat(Var(var)) => resolve(env, var),
         Pat(Sym(sym)) => Data::Sym(sym),
         Error(e) => Data::Error(e),
+    }
+}
+
+fn apply(mut env: Env, fun: Exp, arg: Exp) -> Data {
+    match eval_lazy(env.clone(), fun) {
+        Data::Cons(cons_env, l, r) => {
+            env.extend(cons_env);
+            match apply(env.clone(), *l, arg.clone()) {
+                Data::Error(_) => apply(env, *r, arg),
+                data => data,
+            }
+        }
+        Data::Fun(fun_env, param, body) => {
+            env.extend(fun_env);
+            match param {
+                Var(var) => eval_lazy(bind(env, var, arg), *body),
+                Sym(param) => match eval_lazy(env.clone(), arg) {
+                    Data::Sym(arg) if param == arg => eval_lazy(env, *body),
+                    Data::Sym(arg) => Data::Error(Error::SymMismatch(param, arg)),
+                    Data::Error(e) => Data::Error(e),
+                    data => Data::Error(Error::ExpectedSym(Box::new(data))),
+                },
+            }
+        }
+        Data::Sym(sym) => Data::Error(Error::ApplySym(Box::new(Data::Sym(sym)))),
+        Data::Error(e) => Data::Error(e),
     }
 }
 

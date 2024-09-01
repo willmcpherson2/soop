@@ -31,7 +31,7 @@ fn test_examples() {
     run!("map-free.soop", ":alex, :bob, :charlie");
     run!("map-managed.soop", ":alice, :bob, :none");
     run!("monad.soop", ":some, :alice_wins");
-    run!("number.soop", ":s, :s, :s, :z");
+    run!("number.soop", ":s, :s, :s, :0");
     run!("option.soop", ":false");
     run!("state.soop", ":c");
 }

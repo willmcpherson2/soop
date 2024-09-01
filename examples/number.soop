@@ -1,5 +1,5 @@
-z =
-  :get -> :z,
+0 =
+  :get -> :0,
   :plus -> n -> n;
 
 s = n -> (
@@ -7,6 +7,6 @@ s = n -> (
   :plus -> m -> s (n :plus m)
 );
 
-one = s z;
+one = s 0;
 
 one :plus one :plus one :get

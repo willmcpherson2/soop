@@ -1,13 +1,21 @@
 use soop::{deep_to_exp, eval, parse, print, Env};
 
 macro_rules! run {
-    ($filename:expr, $output:expr) => {
+    ($filename:expr, $expected_output:expr) => {
         let text = std::fs::read_to_string(format!("examples/{}", $filename)).unwrap();
         let exp = parse(&text);
         let deep = eval(Env::new(), exp);
         let exp = deep_to_exp(deep);
-        let out = print(exp);
-        assert_eq!(out, $output);
+        let output = print(exp);
+        println!("output should match expected output");
+        assert_eq!(output, $expected_output);
+
+        let exp = parse(&output);
+        let deep = eval(Env::new(), exp);
+        let exp = deep_to_exp(deep);
+        let eval_output = print(exp);
+        println!("eval(output) should match output");
+        assert_eq!(eval_output, output);
     };
 }
 

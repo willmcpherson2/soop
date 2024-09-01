@@ -1,12 +1,12 @@
 0 =
-  :get -> :0,
+  :show -> :0,
   :plus -> n -> n;
 
 s = n -> (
-  :get -> (:s, n :get),
+  :show -> (:s, n :show),
   :plus -> m -> s (n :plus m)
 );
 
 one = s 0;
 
-one :plus one :plus one :get
+one :plus one :plus one :show

@@ -1,11 +1,11 @@
 true =
-  :get -> :true,
+  :show -> :true,
   :not -> false,
   :or -> x -> true,
   :and -> x -> x;
 
 false =
-  :get -> :false,
+  :show -> :false,
   :not -> true,
   :or -> x -> x,
   :and -> x -> false;
@@ -18,4 +18,4 @@ y = x :not;
 crash = :a :b;
 
 -- doesn't crash because we're lazy!
-x :or crash :and x :get
+x :or crash :and x :show

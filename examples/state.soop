@@ -1,10 +1,6 @@
-not =
-  :true -> :false,
-  :false -> :true;
-
-toggle = x -> (
+state = x -> (
   :get -> x,
-  :flip -> toggle (not x)
+  :map -> f -> state (f x)
 );
 
-toggle :true :flip :flip :get
+state :a :map (:a -> :b) :map (:b -> :c) :get

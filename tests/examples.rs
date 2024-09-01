@@ -33,5 +33,5 @@ fn test_examples() {
     run!("monad.soop", ":some, :alice_wins");
     run!("number.soop", ":s, :s, :s, :z");
     run!("option.soop", ":false");
-    run!("state.soop", ":true");
+    run!("state.soop", ":c");
 }

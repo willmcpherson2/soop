@@ -27,7 +27,7 @@ pub enum Data {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Deep {
     Cons(Box<Deep>, Box<Deep>),
-    Fun(Pat, Box<Exp>),
+    Fun(Env, Pat, Box<Exp>),
     Sym(String),
     Error(Error),
 }
@@ -83,13 +83,4 @@ pub enum Error {
     ApplySym(Box<Data>),
     ExpectedSym(Box<Data>),
     SymMismatch(String, String),
-}
-
-pub fn deep_to_exp(deep: Deep) -> Exp {
-    match deep {
-        Deep::Cons(l, r) => Exp::Cons(Box::new(deep_to_exp(*l)), Box::new(deep_to_exp(*r))),
-        Deep::Fun(l, r) => Exp::Fun(l, r),
-        Deep::Sym(sym) => Exp::Pat(Pat::Sym(sym)),
-        Deep::Error(e) => Exp::Error(e),
-    }
 }

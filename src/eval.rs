@@ -14,7 +14,7 @@ fn eval_deep(data: Data) -> Deep {
         Data::Cons(env, l, r) => {
             Deep::Cons(Box::new(eval(env.clone(), *l)), Box::new(eval(env, *r)))
         }
-        Data::Fun(_, l, r) => Deep::Fun(l, r),
+        Data::Fun(env, l, r) => Deep::Fun(env, l, r),
         Data::Sym(sym) => Deep::Sym(sym),
         Data::Error(e) => Deep::Error(e),
     }
@@ -67,5 +67,19 @@ fn resolve(env: Env, var: String) -> Data {
     match env.get(&var).cloned() {
         Some(Thunk(env, exp)) => eval_lazy(env, exp),
         None => Data::Error(Error::Undefined(var)),
+    }
+}
+
+pub fn deep_to_exp(deep: Deep) -> Exp {
+    match deep {
+        Deep::Cons(l, r) => Cons(Box::new(deep_to_exp(*l)), Box::new(deep_to_exp(*r))),
+        Deep::Fun(env, l, r) => env
+            .into_iter()
+            .fold(Fun(l, r), |body, (var, Thunk(env, exp))| {
+                let exp = deep_to_exp(eval(env, exp));
+                Let(var, Box::new(exp), Box::new(body))
+            }),
+        Deep::Sym(sym) => Pat(Sym(sym)),
+        Deep::Error(e) => Error(e),
     }
 }

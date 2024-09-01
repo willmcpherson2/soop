@@ -68,7 +68,7 @@ fn print_bexp(exp: Bexp) -> String {
 fn print_op(op: Op) -> &'static str {
     match op {
         Op::Semicolon => "; ",
-        Op::Equals => " == ",
+        Op::Equals => " = ",
         Op::Comma => ", ",
         Op::Arrow => " -> ",
         Op::Empty => " ",

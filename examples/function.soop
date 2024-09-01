@@ -1,6 +1,9 @@
 fun = f -> (
-  :app -> f,                           -- application is just a getter
-  :map -> g -> fun (x -> f (g :app x)) -- map is just composition
+  -- application is just a getter
+  :app -> f,
+
+  -- map is just composition
+  :map -> g -> fun (x -> f (g :app x))
 );
 
 f = fun (:c -> :d);

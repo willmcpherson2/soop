@@ -7,7 +7,7 @@ none =
   :show -> :none,
   :bind -> f -> none;
 
-pure = x -> some x;
+pure = some;
 
 initial_to_name =
   :a -> some :alice,

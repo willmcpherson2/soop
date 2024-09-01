@@ -25,7 +25,7 @@ fn test_examples() {
     run!("function.soop", ":d");
     run!(
         "inheritance.soop",
-        "(:alice, :says, :WOO), :and, (:alice, :says, :hello), :to, :bob"
+        "((:alice, :says, :hello), :to, :robert), :and, :alice, :says, :YEAH"
     );
     run!("list.soop", ":true");
     run!("map-free.soop", ":alex, :bob, :charlie");

@@ -14,6 +14,8 @@ x = true;
 
 y = x :not;
 
+-- applying a symbol is an error
 crash = :a :b;
 
-x :or crash :and x :get -- no crash because we're lazy!
+-- doesn't crash because we're lazy!
+x :or crash :and x :get

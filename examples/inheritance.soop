@@ -1,13 +1,16 @@
 person = name -> (
+  self = person name;
   :name -> name,
   :say -> word -> (name, :says, word),
-  :greet -> other -> (person name :say :hello, :to, other :name)
+  :greet -> other -> (self :say :hello, :to, other :name)
 );
 
 alice =
   person :alice,
-  :shout -> alice :say :WOO;
+  :shout -> alice :say :YEAH; -- extend
 
-bob = person :bob;
+bob =
+  :name -> :robert, -- override
+  person :bob;
 
-alice :shout, :and, alice :greet bob
+alice :greet bob, :and, alice :shout

@@ -9,9 +9,9 @@ use crate::{
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until, take_while},
-    character::complete::{alpha1, alphanumeric1, char, multispace1},
+    character::complete::{alphanumeric1, char, multispace1},
     combinator::{all_consuming, map, recognize, success, value},
-    multi::many0,
+    multi::{many0, many1},
     sequence::{delimited, pair, preceded, tuple},
     IResult,
 };
@@ -65,7 +65,7 @@ fn parse_bexp_non_greedy(input: &str) -> IResult<&str, Bexp> {
 }
 
 fn parse_atom(input: &str) -> IResult<&str, Bexp> {
-    alt((parse_parens, parse_var, parse_sym))(input)
+    alt((parse_parens, parse_sym, parse_var))(input)
 }
 
 fn parse_parens(input: &str) -> IResult<&str, Bexp> {
@@ -75,27 +75,18 @@ fn parse_parens(input: &str) -> IResult<&str, Bexp> {
     )(input)
 }
 
-fn parse_var(input: &str) -> IResult<&str, Bexp> {
-    map(
-        recognize(pair(
-            alt((alpha1, tag("_"))),
-            many0(alt((alphanumeric1, tag("_")))),
-        )),
-        |s: &str| Bexp::Pat(Var(s.to_string())),
-    )(input)
+fn parse_sym(input: &str) -> IResult<&str, Bexp> {
+    map(preceded(char(':'), ident), |s| {
+        Bexp::Pat(Sym(s.to_string()))
+    })(input)
 }
 
-fn parse_sym(input: &str) -> IResult<&str, Bexp> {
-    map(
-        preceded(
-            char(':'),
-            recognize(pair(
-                alt((alpha1, tag("_"))),
-                many0(alt((alphanumeric1, tag("_")))),
-            )),
-        ),
-        |s: &str| Bexp::Pat(Sym(s.to_string())),
-    )(input)
+fn parse_var(input: &str) -> IResult<&str, Bexp> {
+    map(ident, |s| Bexp::Pat(Var(s.to_string())))(input)
+}
+
+fn ident(input: &str) -> IResult<&str, &str> {
+    recognize(many1(alt((alphanumeric1, tag("_")))))(input)
 }
 
 fn parse_op(input: &str) -> IResult<&str, Op> {

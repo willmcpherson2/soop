@@ -59,7 +59,7 @@ fn print_bexp(exp: Bexp) -> String {
             format!("{}{}{}", print_bexp(*l), print_op(op), print_bexp(*r))
         }
         Bexp::Parens(bexp) => format!("({})", print_bexp(*bexp),),
-        Bexp::Pat(Pat::Var(var)) => var.to_string(),
+        Bexp::Pat(Pat::Var(var)) => var,
         Bexp::Pat(Pat::Sym(sym)) => format!(":{}", sym),
         Bexp::Error(e) => format!("{:?}", e),
     }

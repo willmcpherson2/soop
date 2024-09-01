@@ -22,6 +22,7 @@ macro_rules! run {
 #[test]
 fn test_examples() {
     run!("bool.soop", ":true");
+    run!("function.soop", ":d");
     run!(
         "inheritance.soop",
         "(:alice, :says, :WOO), :and, (:alice, :says, :hello), :to, :bob"

@@ -1,0 +1,12 @@
+fun = f -> (
+  :app -> f,                           -- application is just a getter
+  :map -> g -> fun (x -> f (g :app x)) -- map is just composition
+);
+
+f = fun (:c -> :d);
+
+g = fun (:b -> :c);
+
+h = fun (:a -> :b);
+
+f :map (g :map h) :app :a

@@ -63,8 +63,8 @@ fn bind(mut env: Env, var: String, exp: Exp) -> Env {
     env
 }
 
-fn resolve(env: Env, var: String) -> Data {
-    match env.get(&var).cloned() {
+fn resolve(mut env: Env, var: String) -> Data {
+    match env.remove(&var) {
         Some(Thunk(env, exp)) => eval_lazy(env, exp),
         None => Data::Error(Error::Undefined(var)),
     }

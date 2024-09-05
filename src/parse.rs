@@ -1,9 +1,7 @@
 use crate::{
     Bexp, Error,
     Exp::{self, *},
-    Op,
-    Pat::*,
-    Side,
+    Op, Side,
 };
 
 use nom::{
@@ -28,23 +26,19 @@ fn parse_exp(bexp: Bexp) -> Exp {
         Bexp::Binary(l, op, r) => match op {
             Op::Semicolon => match *l {
                 Bexp::Binary(var, Op::Equals, exp) => match *var {
-                    Bexp::Pat(Var(var)) => {
-                        Let(var, Box::new(parse_exp(*exp)), Box::new(parse_exp(*r)))
-                    }
+                    Bexp::Var(var) => Let(var, Box::new(parse_exp(*exp)), Box::new(parse_exp(*r))),
                     bexp => Error(Error::ExpectedVar(bexp)),
                 },
                 bexp => Error(Error::ExpectedEquals(bexp)),
             },
             Op::Equals => Error(Error::UnexpectedEquals(bexp)),
             Op::Comma => Cons(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
-            Op::Arrow => match parse_exp(*l) {
-                Pat(pat) => Fun(pat, Box::new(parse_exp(*r))),
-                exp => Error(Error::ExpectedPat(Box::new(exp))),
-            },
+            Op::Arrow => Fun(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
             Op::Empty => App(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
         },
         Bexp::Parens(bexp) => parse_exp(*bexp),
-        Bexp::Pat(pat) => Pat(pat),
+        Bexp::Var(var) => Var(var),
+        Bexp::Sym(var) => Sym(var),
         Bexp::Error(e) => Error(*e),
     }
 }
@@ -76,13 +70,11 @@ fn parse_parens(input: &str) -> IResult<&str, Bexp> {
 }
 
 fn parse_sym(input: &str) -> IResult<&str, Bexp> {
-    map(preceded(char(':'), ident), |s| {
-        Bexp::Pat(Sym(s.to_string()))
-    })(input)
+    map(preceded(char(':'), ident), |s| Bexp::Sym(s.to_string()))(input)
 }
 
 fn parse_var(input: &str) -> IResult<&str, Bexp> {
-    map(ident, |s| Bexp::Pat(Var(s.to_string())))(input)
+    map(ident, |s| Bexp::Var(s.to_string()))(input)
 }
 
 fn ident(input: &str) -> IResult<&str, &str> {

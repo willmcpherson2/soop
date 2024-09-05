@@ -1,7 +1,7 @@
 use crate::{
     Bexp,
     Exp::{self, *},
-    Op, Pat, Side,
+    Op, Side,
 };
 
 pub fn print(exp: Exp) -> String {
@@ -12,7 +12,7 @@ fn print_exp(exp: Exp) -> Bexp {
     match exp {
         Let(var, exp, body) => Bexp::Binary(
             Box::new(Bexp::Binary(
-                Box::new(Bexp::Pat(Pat::Var(var))),
+                Box::new(Bexp::Var(var)),
                 Op::Equals,
                 Box::new(with_parens(*exp, Op::Equals, Side::Right)),
             )),
@@ -25,7 +25,7 @@ fn print_exp(exp: Exp) -> Bexp {
             Box::new(with_parens(*r, Op::Comma, Side::Right)),
         ),
         Fun(pat, body) => Bexp::Binary(
-            Box::new(Bexp::Pat(pat)),
+            Box::new(with_parens(*pat, Op::Arrow, Side::Left)),
             Op::Arrow,
             Box::new(with_parens(*body, Op::Arrow, Side::Right)),
         ),
@@ -34,7 +34,8 @@ fn print_exp(exp: Exp) -> Bexp {
             Op::Empty,
             Box::new(with_parens(*r, Op::Empty, Side::Right)),
         ),
-        Pat(pat) => Bexp::Pat(pat),
+        Var(var) => Bexp::Var(var),
+        Sym(sym) => Bexp::Sym(sym),
         Error(e) => Bexp::Error(Box::new(e)),
     }
 }
@@ -59,8 +60,8 @@ fn print_bexp(exp: Bexp) -> String {
             format!("{}{}{}", print_bexp(*l), print_op(op), print_bexp(*r))
         }
         Bexp::Parens(bexp) => format!("({})", print_bexp(*bexp),),
-        Bexp::Pat(Pat::Var(var)) => var,
-        Bexp::Pat(Pat::Sym(sym)) => format!(":{}", sym),
+        Bexp::Var(var) => var,
+        Bexp::Sym(sym) => format!(":{}", sym),
         Bexp::Error(e) => format!("{:?}", e),
     }
 }

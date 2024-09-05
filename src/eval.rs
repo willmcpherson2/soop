@@ -1,7 +1,6 @@
 use crate::{
     Data, Deep, Env, Error,
     Exp::{self, *},
-    Pat::*,
     Thunk,
 };
 
@@ -24,10 +23,10 @@ fn eval_lazy(env: Env, exp: Exp) -> Data {
     match exp {
         Let(var, exp, body) => eval_lazy(bind(env, var, *exp), *body),
         Cons(l, r) => Data::Cons(env, l, r),
-        Fun(param, body) => Data::Fun(env, param, body),
+        Fun(pat, body) => Data::Fun(env, pat, body),
         App(fun, arg) => apply(env, *fun, *arg),
-        Pat(Var(var)) => resolve(env, var),
-        Pat(Sym(sym)) => Data::Sym(sym),
+        Var(var) => resolve(env, var),
+        Sym(sym) => Data::Sym(sym),
         Error(e) => Data::Error(e),
     }
 }
@@ -41,20 +40,75 @@ fn apply(mut env: Env, fun: Exp, arg: Exp) -> Data {
                 data => data,
             }
         }
-        Data::Fun(fun_env, param, body) => {
+        Data::Fun(fun_env, pat, body) => {
             env.extend(fun_env);
-            match param {
-                Var(var) => eval_lazy(bind(env, var, arg), *body),
-                Sym(param) => match eval_lazy(env.clone(), arg) {
-                    Data::Sym(arg) if param == arg => eval_lazy(env, *body),
-                    Data::Sym(arg) => Data::Error(Error::SymMismatch(param, arg)),
-                    Data::Error(e) => Data::Error(e),
-                    data => Data::Error(Error::ExpectedSym(Box::new(data))),
-                },
+            match pattern_match(env, *pat, arg) {
+                Ok(env) => eval_lazy(env, *body),
+                Err(e) => Data::Error(e),
             }
         }
         Data::Sym(sym) => Data::Error(Error::ApplySym(Box::new(Data::Sym(sym)))),
         Data::Error(e) => Data::Error(e),
+    }
+}
+
+fn pattern_match(mut env: Env, pat: Exp, arg: Exp) -> Result<Env, Error> {
+    match pat {
+        Let(var, exp, body) => match arg {
+            Let(_, arg_exp, arg_body) => {
+                env.extend(pattern_match(env.clone(), *exp, *arg_exp)?);
+                env.extend(pattern_match(env.clone(), *body, *arg_body)?);
+                Ok(env)
+            }
+            other => Err(Error::PatternMatchExp(
+                Box::new(Let(var, exp, body)),
+                Box::new(other),
+            )),
+        },
+        Cons(l, r) => match eval_lazy(env.clone(), arg) {
+            Data::Cons(arg_env, arg_l, arg_r) => {
+                env.extend(arg_env);
+                env.extend(pattern_match(env.clone(), *l, *arg_l)?);
+                env.extend(pattern_match(env.clone(), *r, *arg_r)?);
+                Ok(env)
+            }
+            other => Err(Error::PatternMatchData(
+                Box::new(Cons(l, r)),
+                Box::new(other),
+            )),
+        },
+        Fun(pat, body) => match eval_lazy(env.clone(), arg) {
+            Data::Fun(arg_env, arg_pat, arg_body) => {
+                env.extend(arg_env);
+                env.extend(pattern_match(env.clone(), *pat, *arg_pat)?);
+                env.extend(pattern_match(env.clone(), *body, *arg_body)?);
+                Ok(env)
+            }
+            other => Err(Error::PatternMatchData(
+                Box::new(Fun(pat, body)),
+                Box::new(other),
+            )),
+        },
+        App(l, r) => match arg {
+            App(arg_l, arg_r) => {
+                env.extend(pattern_match(env.clone(), *l, *arg_l)?);
+                env.extend(pattern_match(env.clone(), *r, *arg_r)?);
+                Ok(env)
+            }
+            other => Err(Error::PatternMatchExp(Box::new(App(l, r)), Box::new(other))),
+        },
+        Var(var) => Ok(bind(env, var, arg)),
+        Sym(sym) => match eval_lazy(env.clone(), arg) {
+            Data::Sym(arg_sym) => {
+                if sym == arg_sym {
+                    Ok(env)
+                } else {
+                    Err(Error::PatternMatchSym(sym, arg_sym))
+                }
+            }
+            other => Err(Error::PatternMatchData(Box::new(Sym(sym)), Box::new(other))),
+        },
+        Exp::Error(e) => Err(e),
     }
 }
 
@@ -79,7 +133,7 @@ pub fn deep_to_exp(deep: Deep) -> Exp {
                 let exp = deep_to_exp(eval(env, exp));
                 Let(var, Box::new(exp), Box::new(body))
             }),
-        Deep::Sym(sym) => Pat(Sym(sym)),
+        Deep::Sym(sym) => Sym(sym),
         Deep::Error(e) => Error(e),
     }
 }

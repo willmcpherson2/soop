@@ -36,7 +36,7 @@ fn print_exp(exp: Exp) -> Bexp {
         ),
         Var(var) => Bexp::Var(var),
         Sym(sym) => Bexp::Sym(sym),
-        Error(e) => Bexp::Error(Box::new(e)),
+        Error(e) => Bexp::Error(e),
     }
 }
 

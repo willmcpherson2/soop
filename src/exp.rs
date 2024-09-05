@@ -38,7 +38,7 @@ pub enum Bexp {
     Parens(Box<Bexp>),
     Var(String),
     Sym(String),
-    Error(Box<Error>), // TODO unbox?
+    Error(Error),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd)]
@@ -71,9 +71,9 @@ pub enum Side {
 #[derive(Debug, Clone, PartialEq)]
 pub enum Error {
     ParseError(String),
-    UnexpectedEquals(Bexp),
-    ExpectedVar(Bexp),
-    ExpectedEquals(Bexp),
+    UnexpectedEquals(Box<Bexp>),
+    ExpectedVar(Box<Bexp>),
+    ExpectedEquals(Box<Bexp>),
     Undefined(String),
     ApplySym(Box<Data>),
     PatternMatchExp(Box<Exp>, Box<Exp>),

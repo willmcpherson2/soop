@@ -27,11 +27,11 @@ fn parse_exp(bexp: Bexp) -> Exp {
             Op::Semicolon => match *l {
                 Bexp::Binary(var, Op::Equals, exp) => match *var {
                     Bexp::Var(var) => Let(var, Box::new(parse_exp(*exp)), Box::new(parse_exp(*r))),
-                    bexp => Error(Error::ExpectedVar(bexp)),
+                    bexp => Error(Error::ExpectedVar(Box::new(bexp))),
                 },
-                bexp => Error(Error::ExpectedEquals(bexp)),
+                bexp => Error(Error::ExpectedEquals(Box::new(bexp))),
             },
-            Op::Equals => Error(Error::UnexpectedEquals(bexp)),
+            Op::Equals => Error(Error::UnexpectedEquals(Box::new(bexp))),
             Op::Comma => Cons(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
             Op::Arrow => Fun(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
             Op::Empty => App(Box::new(parse_exp(*l)), Box::new(parse_exp(*r))),
@@ -39,7 +39,7 @@ fn parse_exp(bexp: Bexp) -> Exp {
         Bexp::Parens(bexp) => parse_exp(*bexp),
         Bexp::Var(var) => Var(var),
         Bexp::Sym(var) => Sym(var),
-        Bexp::Error(e) => Error(*e),
+        Bexp::Error(e) => Error(e),
     }
 }
 

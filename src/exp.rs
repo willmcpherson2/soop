@@ -76,7 +76,6 @@ pub enum Error {
     ExpectedEquals(Box<Bexp>),
     Undefined(String),
     ApplySym(Box<Data>),
-    PatternMatchExp(Box<Exp>, Box<Exp>),
     PatternMatchData(Box<Exp>, Box<Data>),
     PatternMatchSym(String, String),
 }

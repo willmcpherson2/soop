@@ -54,61 +54,46 @@ fn apply(env: Env, fun: Exp, arg: Exp) -> Data {
 
 fn pattern_match(env: Env, pat: Exp, arg: Exp) -> Result<Env, Error> {
     match pat {
-        Let(var, exp, body) => match arg {
-            Let(_, arg_exp, arg_body) => Ok(extend(
-                pattern_match(env.clone(), *exp, *arg_exp)?,
-                pattern_match(env, *body, *arg_body)?,
-            )),
-            other => Err(Error::PatternMatchExp(
-                Box::new(Let(var, exp, body)),
-                Box::new(other),
-            )),
-        },
-        Cons(l, r) => match eval_lazy(env.clone(), arg) {
-            Data::Cons(arg_env, arg_l, arg_r) => {
-                let env = extend(env, arg_env);
-                Ok(extend(
-                    pattern_match(env.clone(), *l, *arg_l)?,
-                    pattern_match(env, *r, *arg_r)?,
-                ))
-            }
-            other => Err(Error::PatternMatchData(
-                Box::new(Cons(l, r)),
-                Box::new(other),
-            )),
-        },
-        Fun(pat, body) => match eval_lazy(env.clone(), arg) {
-            Data::Fun(arg_env, arg_pat, arg_body) => {
-                let env = extend(env, arg_env);
-                Ok(extend(
-                    pattern_match(env.clone(), *pat, *arg_pat)?,
-                    pattern_match(env, *body, *arg_body)?,
-                ))
-            }
-            other => Err(Error::PatternMatchData(
-                Box::new(Fun(pat, body)),
-                Box::new(other),
-            )),
-        },
-        App(l, r) => match arg {
-            App(arg_l, arg_r) => Ok(extend(
-                pattern_match(env.clone(), *l, *arg_l)?,
-                pattern_match(env, *r, *arg_r)?,
-            )),
-            other => Err(Error::PatternMatchExp(Box::new(App(l, r)), Box::new(other))),
-        },
-        Var(var) => Ok(bind(env, var, arg)),
-        Sym(sym) => match eval_lazy(env.clone(), arg) {
-            Data::Sym(arg_sym) => {
-                if sym == arg_sym {
-                    Ok(env)
-                } else {
-                    Err(Error::PatternMatchSym(sym, arg_sym))
+        Exp::Var(var) => Ok(bind(env, var, arg)),
+        pat => match eval_lazy(env.clone(), pat) {
+            Data::Cons(_, l, r) => match eval_lazy(env.clone(), arg) {
+                Data::Cons(arg_env, arg_l, arg_r) => {
+                    let env = extend(env, arg_env);
+                    Ok(extend(
+                        pattern_match(env.clone(), *l, *arg_l)?,
+                        pattern_match(env, *r, *arg_r)?,
+                    ))
                 }
-            }
-            other => Err(Error::PatternMatchData(Box::new(Sym(sym)), Box::new(other))),
+                other => Err(Error::PatternMatchData(
+                    Box::new(Cons(l, r)),
+                    Box::new(other),
+                )),
+            },
+            Data::Fun(_, pat, body) => match eval_lazy(env.clone(), arg) {
+                Data::Fun(arg_env, arg_pat, arg_body) => {
+                    let env = extend(env, arg_env);
+                    Ok(extend(
+                        pattern_match(env.clone(), *pat, *arg_pat)?,
+                        pattern_match(env, *body, *arg_body)?,
+                    ))
+                }
+                other => Err(Error::PatternMatchData(
+                    Box::new(Fun(pat, body)),
+                    Box::new(other),
+                )),
+            },
+            Data::Sym(sym) => match eval_lazy(env.clone(), arg) {
+                Data::Sym(arg_sym) => {
+                    if sym == arg_sym {
+                        Ok(env)
+                    } else {
+                        Err(Error::PatternMatchSym(sym, arg_sym))
+                    }
+                }
+                other => Err(Error::PatternMatchData(Box::new(Sym(sym)), Box::new(other))),
+            },
+            Data::Error(e) => Err(e),
         },
-        Exp::Error(e) => Err(e),
     }
 }
 
